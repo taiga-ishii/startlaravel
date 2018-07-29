@@ -13,6 +13,25 @@ class PersonTest extends TestCase
     {
       parent::setUp();
       $this->personMock =  Mockery::mock('App\Models\Person');
+      $this->personMock
+            ->shouldReceive('getAttribute')
+            ->with('id')
+            ->andReturn(1);
+        $this->personMock
+            ->shouldReceive('getAttribute')
+            ->with('name')
+            ->andReturn('Jessie');
+        $this->personMock
+            ->shouldReceive('getAttribute')
+            ->with('height')
+            ->andReturn(1.73);
+        $this->personMock
+            ->shouldReceive('getAttribute')
+            ->with('weight')
+            ->andReturn(59.0);
+        $this->personMock
+            ->shouldReceive('getAttribute')
+            ->andReturn(null);
     }
     public function tearDown()
     {
@@ -31,21 +50,15 @@ class PersonTest extends TestCase
 
     public function testPersonList()
    {
-        $this->personMock
-            ->shouldReceive('all')
-            ->once()
-            ->andReturn($this->personMock);
-        $this->app->instance('App\Models\Person', $this->personMock);
-
        $response = $this->json('GET','person');
        $response->assertStatus(200);
    }
     public function testPersonStore()
    {
      $this->personMock
-           ->shouldReceive('save')
+            ->shouldReceive('create')
            ->once()
-           ->andReturn(1);
+           ->andReturn($this->personMock);
        $this->app->instance('App\Models\Person', $this->personMock);
        $response = $this->json('POST','person',
            ['name' => 'Johnny', 'weight' => '60', 'height' => '1.72']);
@@ -66,10 +79,15 @@ class PersonTest extends TestCase
      $this->personMock
         ->shouldReceive('resolveRouteBinding')
         ->once()
-        ->andReturn($this->personMock)
+        ->andReturn($this->personMock);
+         $this->personMock
+
         ->shouldReceive('save')
         ->once()
         ->andReturn($this->personMock);
+
+         $this->personMock->shouldIgnoreMissing();
+
     $this->app->instance('App\Models\Person', $this->personMock);
        $response = $this->json('PUT','person/1', ['name' => 'Johnson']);
        $response->assertStatus(200);
@@ -79,7 +97,8 @@ class PersonTest extends TestCase
      $this->personMock
           ->shouldReceive('resolveRouteBinding')
           ->once()
-          ->andReturn($this->personMock)
+          ->andReturn($this->personMock);
+       $this->personMock
           ->shouldReceive('delete')
           ->once()
           ->andReturn(1);
